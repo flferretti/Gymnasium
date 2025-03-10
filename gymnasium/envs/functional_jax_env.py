@@ -217,8 +217,9 @@ class FunctionalJaxVectorEnv(gym.vector.VectorEnv):
     def render(self):
         """Returns the render state if `render_mode` is "rgb_array"."""
         if self.render_mode == "rgb_array":
+            single_state = jax.tree_util.tree_map(lambda leaf: leaf[0], self.state)
             self.render_state, image = self.func_env.render_image(
-                self.state, self.render_state
+                single_state, self.render_state
             )
             return image
         else:
