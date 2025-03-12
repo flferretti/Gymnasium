@@ -184,7 +184,7 @@ class FunctionalJaxVectorEnv(gym.vector.VectorEnv):
             else jnp.zeros_like(terminated)
         )
 
-        info = self.func_env.transition_info(self.state, action, next_state)
+        info = self.func_env.step_info(self.state, action, next_state)
 
         if jnp.any(self.prev_done):
             to_reset = jnp.where(self.prev_done)[0]
