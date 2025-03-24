@@ -138,6 +138,8 @@ class FunctionalJaxVectorEnv(gym.vector.VectorEnv):
 
         if self.render_mode == "rgb_array":
             self.render_state = self.func_env.render_init()
+        elif self.render_mode == "rgb_array_batch":
+            self.render_state = self.func_env.render_init(num_envs=num_envs)
         else:
             self.render_state = None
 
@@ -216,12 +218,17 @@ class FunctionalJaxVectorEnv(gym.vector.VectorEnv):
 
     def render(self):
         """Returns the render state if `render_mode` is "rgb_array"."""
+
         if self.render_mode == "rgb_array":
             single_state = jax.tree_util.tree_map(lambda leaf: leaf[0], self.state)
             self.render_state, image = self.func_env.render_image(
                 single_state, self.render_state
             )
             return image
+        elif self.render_mode == "rgb_array_batch":
+            self.render_state, image = self.func_env.render_image(
+                self.state, self.render_state
+            )
         else:
             raise NotImplementedError
 
