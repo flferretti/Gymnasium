@@ -188,23 +188,22 @@ class FunctionalJaxVectorEnv(gym.vector.VectorEnv):
 
         info = self.func_env.step_info(self.state, action, next_state)
 
-        if jnp.any(self.prev_done):
-            to_reset = jnp.where(self.prev_done)[0]
-            reset_count = to_reset.shape[0]
+        to_reset = jnp.where(self.prev_done)[0]
+        reset_count = to_reset.shape[0]
 
-            rng, self.rng = jrng.split(self.rng)
-            rng = jrng.split(rng, reset_count)
+        rng, self.rng = jrng.split(self.rng)
+        rng = jrng.split(rng, reset_count)
 
-            new_initials = self.func_env.initial(rng)
+        new_initials = self.func_env.initial(rng)
 
-            # PyTree reset of the environment state.
-            next_state = jax.tree.map(
-                lambda x, y: x.at[to_reset].set(y), self.state, new_initials
-            )
+        # PyTree reset of the environment state.
+        next_state = jax.tree.map(
+            lambda x, y: x.at[to_reset].set(y), self.state, new_initials
+        )
 
-            self.steps = self.steps.at[to_reset].set(0)
-            terminated = terminated.at[to_reset].set(False)
-            truncated = truncated.at[to_reset].set(False)
+        self.steps = self.steps.at[to_reset].set(0)
+        terminated = terminated.at[to_reset].set(False)
+        truncated = truncated.at[to_reset].set(False)
 
         self.prev_done = jnp.logical_or(terminated, truncated)
 
