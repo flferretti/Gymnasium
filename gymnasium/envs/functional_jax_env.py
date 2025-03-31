@@ -198,7 +198,7 @@ class FunctionalJaxVectorEnv(gym.vector.VectorEnv):
 
         # PyTree reset of the environment state.
         next_state = jax.tree.map(
-            lambda x, y: x.at[to_reset].set(y), self.state, new_initials
+            lambda x, y: x.at[to_reset].set(y), next_state, new_initials
         )
 
         self.steps = self.steps.at[to_reset].set(0)
