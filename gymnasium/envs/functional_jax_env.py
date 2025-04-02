@@ -186,19 +186,20 @@ class FunctionalJaxVectorEnv(gym.vector.VectorEnv):
 
         info = self.func_env.transition_info(self.state, action, next_state)
 
-        if jnp.any(self.prev_done):
-            to_reset = jnp.where(self.prev_done)[0]
-            reset_count = to_reset.shape[0]
+        new_initials = self.func_env.initial(rng)
 
-            rng, self.rng = jrng.split(self.rng)
-            rng = jrng.split(rng, reset_count)
-
-            new_initials = self.func_env.initial(rng)
-
-            next_state = self.state.at[to_reset].set(new_initials)
-            self.steps = self.steps.at[to_reset].set(0)
-            terminated = terminated.at[to_reset].set(False)
-            truncated = truncated.at[to_reset].set(False)
+        next_state = jnp.where(
+            self.prev_done[(...,) + (None,) * (new_initials.ndim - 1)],
+            new_initials,
+            self.state,
+        )
+        self.steps = jnp.where(self.prev_done, jnp.zeros_like(self.steps), self.steps)
+        terminated = jnp.where(
+            self.prev_done, jnp.zeros_like(terminated, dtype=bool), terminated
+        )
+        truncated = jnp.where(
+            self.prev_done, jnp.zeros_like(truncated, dtype=bool), truncated
+        )
 
         self.prev_done = jnp.logical_or(terminated, truncated)
 
