@@ -221,13 +221,14 @@ class FunctionalJaxVectorEnv(gym.vector.VectorEnv):
             self.render_state, image = self.func_env.render_image(
                 single_state, self.render_state
             )
-            return image
         elif self.render_mode == "rgb_array_batch":
             self.render_state, image = self.func_env.render_image(
                 self.state, self.render_state
             )
         else:
             raise NotImplementedError
+
+        return image
 
     def close(self):
         """Closes the environments and render state if set."""
